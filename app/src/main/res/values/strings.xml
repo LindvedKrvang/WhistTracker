@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Whist Tracker</string>
+    <string name="player_one">Player One</string>
+    <string name="player_two">Player Two</string>
+    <string name="player_three">Player Three</string>
+    <string name="player_four">Player Four</string>
+
+    <string name="placeholder_number">0</string>
+
+    <string name="title">Whist Tracker</string>
+    <string name="button_start">Start</string>
+</resources>
