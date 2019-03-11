@@ -15,8 +15,8 @@ import android.widget.TextView;
 
 import com.krvang.lindved.whisttracker.R;
 import com.krvang.lindved.whisttracker.be.Player;
+import com.krvang.lindved.whisttracker.model.PlayerModel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SetupFragment extends Fragment {
@@ -32,11 +32,11 @@ public class SetupFragment extends Fragment {
         return fragment;
     }
 
-    private int mNumberOfPlayers;
+    private int mMaxNumberOfPlayers;
 
     private RecyclerView mRecyclerView;
     private PlayerAdapter mPlayerAdapter;
-    private List<Player> mPlayers = new ArrayList<>();
+    private PlayerModel mPlayerModel;
 
     private ImageView mAddPlayerButton;
     private EditText mPlayerNameTextField;
@@ -48,8 +48,8 @@ public class SetupFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mNumberOfPlayers = getArguments().getInt(ARG_NUMBER_OF_PLAYERS_ID);
-        mPlayers = new ArrayList<>();
+        mMaxNumberOfPlayers = getArguments().getInt(ARG_NUMBER_OF_PLAYERS_ID);
+        mPlayerModel = PlayerModel.getInstance();
     }
 
     @Nullable
@@ -83,27 +83,30 @@ public class SetupFragment extends Fragment {
         mPlayerNameTextField.setText("");
 
         Player player = new Player(name);
-        mPlayers.add(player);
+        mPlayerModel.addPlayer(player);
 
         updateUi();
     }
 
     private void updateUi() {
-        int remainingPlayers = mNumberOfPlayers - mPlayers.size();
+        int remainingPlayers = mMaxNumberOfPlayers - mPlayerModel.getPlayers().size();
         mSubTitle.setText(String.format("%s: %s", getString(R.string.subtitle_remaining_players), remainingPlayers));
 
 
-        if(mPlayers.size() >= mNumberOfPlayers) {
+        if(mPlayerModel.getPlayers().size() >= mMaxNumberOfPlayers) {
             mPlayerNameTextField.setEnabled(false);
             mAddPlayerButton.setVisibility(View.INVISIBLE);
+        } else {
+            mPlayerNameTextField.setEnabled(true);
+            mAddPlayerButton.setVisibility(View.VISIBLE);
         }
 
         if(mPlayerAdapter == null){
-            mPlayerAdapter = new PlayerAdapter(mPlayers);
+            mPlayerAdapter = new PlayerAdapter(mPlayerModel.getPlayers());
             mRecyclerView.setAdapter(mPlayerAdapter);
         }
         else {
-            mPlayerAdapter.setPlayers(mPlayers);
+            mPlayerAdapter.setPlayers(mPlayerModel.getPlayers());
             mPlayerAdapter.notifyDataSetChanged();
         }
     }
@@ -125,12 +128,21 @@ public class SetupFragment extends Fragment {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull PlayerViewHolder playerViewHolder, int i) {
+        public void onBindViewHolder(@NonNull final PlayerViewHolder playerViewHolder, int i) {
             TextView playerLabel = playerViewHolder.itemView.findViewById(R.id.txtPlayerLabel);
             playerLabel.setText(R.string.player_label);
 
             TextView nameLabel = playerViewHolder.itemView.findViewById(R.id.txtPlayerName);
             nameLabel.setText(mPlayers.get(i).getName());
+
+            ImageView deleteButton = playerViewHolder.itemView.findViewById(R.id.btnDelete);
+            deleteButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPlayerModel.removePlayerAtIndex(playerViewHolder.getAdapterPosition());
+                    updateUi();
+                }
+            });
         }
 
         @Override
