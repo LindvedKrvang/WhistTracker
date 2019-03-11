@@ -9,49 +9,103 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.krvang.lindved.whisttracker.R;
 import com.krvang.lindved.whisttracker.be.Player;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SetupFragment extends Fragment {
 
+    public static String ARG_NUMBER_OF_PLAYERS_ID = "com.krvang.lindved.numbers_of_players_id";
+
+    public static SetupFragment newInstance(int numberOfPlayers) {
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_NUMBER_OF_PLAYERS_ID, numberOfPlayers);
+
+        SetupFragment fragment = new SetupFragment();
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    private int mNumberOfPlayers;
+
     private RecyclerView mRecyclerView;
     private PlayerAdapter mPlayerAdapter;
+    private List<Player> mPlayers = new ArrayList<>();
 
-    private List<Player> mPlayers;
+    private ImageView mAddPlayerButton;
+    private EditText mPlayerNameTextField;
+    private TextView mSubTitle;
+
+
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mPlayers = Arrays.asList(
-                new Player("Player One"),
-                new Player("Player Two"),
-                new Player("Player Three"),
-                new Player("Player Four")
-        );
+        mNumberOfPlayers = getArguments().getInt(ARG_NUMBER_OF_PLAYERS_ID);
+        mPlayers = new ArrayList<>();
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_setup, container, false);
-        initializeRecyclerView(view);
+        initializeWidgets(view);
         updateUi();
+
         return view;
     }
 
-    private void initializeRecyclerView(View view) {
+    private void initializeWidgets(View view){
         mRecyclerView = view.findViewById(R.id.playerRecyclerView);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
+        mAddPlayerButton = view.findViewById(R.id.btnAdd);
+        mAddPlayerButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAddPlayerClicked();
+            }
+        });
+
+        mPlayerNameTextField = view.findViewById(R.id.txtPlayerName);
+        mSubTitle = view.findViewById(R.id.txtSubTitle);
+    }
+
+    private void onAddPlayerClicked() {
+        String name = mPlayerNameTextField.getText().toString();
+        mPlayerNameTextField.setText("");
+
+        Player player = new Player(name);
+        mPlayers.add(player);
+
+        updateUi();
     }
 
     private void updateUi() {
-        mPlayerAdapter = new PlayerAdapter(mPlayers);
-        mRecyclerView.setAdapter(mPlayerAdapter);
+        int remainingPlayers = mNumberOfPlayers - mPlayers.size();
+        mSubTitle.setText(String.format("%s: %s", getString(R.string.subtitle_remaining_players), remainingPlayers));
+
+
+        if(mPlayers.size() >= mNumberOfPlayers) {
+            mPlayerNameTextField.setEnabled(false);
+            mAddPlayerButton.setVisibility(View.INVISIBLE);
+        }
+
+        if(mPlayerAdapter == null){
+            mPlayerAdapter = new PlayerAdapter(mPlayers);
+            mRecyclerView.setAdapter(mPlayerAdapter);
+        }
+        else {
+            mPlayerAdapter.setPlayers(mPlayers);
+            mPlayerAdapter.notifyDataSetChanged();
+        }
     }
 
     private class PlayerAdapter extends RecyclerView.Adapter<PlayerViewHolder> {
@@ -82,6 +136,10 @@ public class SetupFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mPlayers.size();
+        }
+
+        public void setPlayers(List<Player> players){
+            mPlayers = players;
         }
     }
 

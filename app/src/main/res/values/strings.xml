@@ -10,6 +10,9 @@
     <string name="placeholder_number">0</string>
 
     <string name="title">Whist Tracker</string>
+    <string name="title_setup">Add Players</string>
+    <string name="subtitle_remaining_players">Players remaining</string>
+
     <string name="name">Name</string>
     <string name="button_start">Start</string>
     <string name="button_back">Back</string>
