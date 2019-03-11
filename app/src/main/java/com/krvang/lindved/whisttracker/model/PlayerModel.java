@@ -25,11 +25,23 @@ public class PlayerModel {
         return mPlayers;
     }
 
+    public int getAmountOfPlayers() {
+        return mPlayers.size();
+    }
+
+    public Player getPlayerByIndex(int index) {
+        return mPlayers.get(index);
+    }
+
     public void addPlayer(Player player) {
         mPlayers.add(player);
     }
 
     public void removePlayerAtIndex(int index) {
         mPlayers.remove(index);
+    }
+
+    public void updatePlayerName(int index, String name) {
+        mPlayers.get(index).setName(name);
     }
 }

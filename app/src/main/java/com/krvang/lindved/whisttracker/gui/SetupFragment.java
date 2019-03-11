@@ -1,6 +1,8 @@
 package com.krvang.lindved.whisttracker.gui;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,6 +34,15 @@ public class SetupFragment extends Fragment {
         return fragment;
     }
 
+    private final boolean SHOW = true;
+    private final boolean HIDE = false;
+
+    private interface ButtonCommand {
+        void buttonClicked();
+    }
+
+    private ButtonCommand mButtonCommand;
+
     private int mMaxNumberOfPlayers;
 
     private RecyclerView mRecyclerView;
@@ -50,6 +61,7 @@ public class SetupFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mMaxNumberOfPlayers = getArguments().getInt(ARG_NUMBER_OF_PLAYERS_ID);
         mPlayerModel = PlayerModel.getInstance();
+        mButtonCommand = new AddPlayerCommand();
     }
 
     @Nullable
@@ -70,7 +82,7 @@ public class SetupFragment extends Fragment {
         mAddPlayerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                onAddPlayerClicked();
+                mButtonCommand.buttonClicked();
             }
         });
 
@@ -78,7 +90,7 @@ public class SetupFragment extends Fragment {
         mSubTitle = view.findViewById(R.id.txtSubTitle);
     }
 
-    private void onAddPlayerClicked() {
+    private void addNewPlayer() {
         String name = mPlayerNameTextField.getText().toString();
         mPlayerNameTextField.setText("");
 
@@ -89,17 +101,10 @@ public class SetupFragment extends Fragment {
     }
 
     private void updateUi() {
-        int remainingPlayers = mMaxNumberOfPlayers - mPlayerModel.getPlayers().size();
+        int remainingPlayers = mMaxNumberOfPlayers - mPlayerModel.getAmountOfPlayers();
         mSubTitle.setText(String.format("%s: %s", getString(R.string.subtitle_remaining_players), remainingPlayers));
 
-
-        if(mPlayerModel.getPlayers().size() >= mMaxNumberOfPlayers) {
-            mPlayerNameTextField.setEnabled(false);
-            mAddPlayerButton.setVisibility(View.INVISIBLE);
-        } else {
-            mPlayerNameTextField.setEnabled(true);
-            mAddPlayerButton.setVisibility(View.VISIBLE);
-        }
+        showHideEditField(mPlayerModel.getAmountOfPlayers() >= mMaxNumberOfPlayers ? HIDE : SHOW);
 
         if(mPlayerAdapter == null){
             mPlayerAdapter = new PlayerAdapter(mPlayerModel.getPlayers());
@@ -111,12 +116,42 @@ public class SetupFragment extends Fragment {
         }
     }
 
+    private void showHideEditField(boolean show) {
+        if(show) {
+            mPlayerNameTextField.setEnabled(true);
+            mPlayerNameTextField.setVisibility(View.VISIBLE);
+            mAddPlayerButton.setVisibility(View.VISIBLE);
+        } else {
+            mPlayerNameTextField.setEnabled(false);
+            mPlayerNameTextField.setVisibility(View.GONE);
+            mAddPlayerButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void setupEditPlayer(int playerIndex) {
+        showHideEditField(SHOW);
+        mAddPlayerButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_edit));
+        Player player = mPlayerModel.getPlayerByIndex(playerIndex);
+        mPlayerNameTextField.setText(player.getName());
+        mPlayerNameTextField.requestFocus();
+        mButtonCommand = new EditPlayerCommand(playerIndex);
+    }
+
+    private void editPlayer(int playerIndex) {
+        String name = mPlayerNameTextField.getText().toString();
+        mPlayerModel.updatePlayerName(playerIndex, name);
+        mPlayerNameTextField.setText("");
+        mAddPlayerButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_menu_add));
+        updateUi();
+        mButtonCommand = new AddPlayerCommand();
+    }
+
     private class PlayerAdapter extends RecyclerView.Adapter<PlayerViewHolder> {
 
-        private List<Player> mPlayers;
+        private List<Player> players;
 
         public PlayerAdapter(List<Player> players) {
-            mPlayers = players;
+            this.players = players;
         }
 
         @NonNull
@@ -133,7 +168,7 @@ public class SetupFragment extends Fragment {
             playerLabel.setText(R.string.player_label);
 
             TextView nameLabel = playerViewHolder.itemView.findViewById(R.id.txtPlayerName);
-            nameLabel.setText(mPlayers.get(i).getName());
+            nameLabel.setText(players.get(i).getName());
 
             ImageView deleteButton = playerViewHolder.itemView.findViewById(R.id.btnDelete);
             deleteButton.setOnClickListener(new View.OnClickListener() {
@@ -143,15 +178,24 @@ public class SetupFragment extends Fragment {
                     updateUi();
                 }
             });
+
+            ImageView editButton = playerViewHolder.itemView.findViewById(R.id.btnEdit);
+            editButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int playerIndex = playerViewHolder.getAdapterPosition();
+                    setupEditPlayer(playerIndex);
+                }
+            });
         }
 
         @Override
         public int getItemCount() {
-            return mPlayers.size();
+            return players.size();
         }
 
-        public void setPlayers(List<Player> players){
-            mPlayers = players;
+        private void setPlayers(List<Player> players){
+            this.players = players;
         }
     }
 
@@ -159,6 +203,28 @@ public class SetupFragment extends Fragment {
 
         public PlayerViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.player_list_item, parent, false));
+        }
+    }
+
+    private class AddPlayerCommand implements ButtonCommand {
+
+        @Override
+        public void buttonClicked() {
+            addNewPlayer();
+        }
+    }
+
+    private class EditPlayerCommand implements ButtonCommand {
+
+        private int playerIndex;
+
+        public EditPlayerCommand(int playerIndex){
+            this.playerIndex = playerIndex;
+        }
+
+        @Override
+        public void buttonClicked() {
+            editPlayer(playerIndex);
         }
     }
 }
