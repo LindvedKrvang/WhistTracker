@@ -9,11 +9,15 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.krvang.lindved.whisttracker.R;
 import com.krvang.lindved.whisttracker.be.Player;
@@ -53,6 +57,7 @@ public class SetupFragment extends Fragment {
     private EditText mPlayerNameTextField;
     private TextView mSubTitle;
 
+    private MenuItem mStart;
 
 
 
@@ -62,6 +67,8 @@ public class SetupFragment extends Fragment {
         mMaxNumberOfPlayers = getArguments().getInt(ARG_NUMBER_OF_PLAYERS_ID);
         mPlayerModel = PlayerModel.getInstance();
         mButtonCommand = new AddPlayerCommand();
+
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -72,6 +79,27 @@ public class SetupFragment extends Fragment {
         updateUi();
 
         return view;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_setup, menu);
+
+        mStart = menu.findItem(R.id.btnStart);
+        mStart.setEnabled(false);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.btnStart:
+                // TODO RKL: Go to game activity.
+                Toast.makeText(getActivity(), "Game coming soon...", Toast.LENGTH_LONG).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     private void initializeWidgets(View view){
@@ -126,6 +154,12 @@ public class SetupFragment extends Fragment {
             mPlayerNameTextField.setVisibility(View.GONE);
             mAddPlayerButton.setVisibility(View.GONE);
         }
+        showHideMenu(!show);
+    }
+
+    private void showHideMenu(boolean show) {
+        if (mStart == null) return;
+        mStart.setEnabled(show);
     }
 
     private void setupEditPlayer(int playerIndex) {
