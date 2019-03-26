@@ -26,4 +26,11 @@ public abstract class SingleFragmentActivity extends AppCompatActivity {
                     .commit();
         }
     }
+
+    protected void switchFragments(Fragment fragment) {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .add(R.id.fragment_container, fragment)
+                .commit();
+    }
 }

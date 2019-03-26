@@ -1,8 +1,7 @@
 package com.krvang.lindved.whisttracker.gui;
 
-import android.graphics.drawable.Drawable;
+import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -38,6 +37,10 @@ public class SetupFragment extends Fragment {
         return fragment;
     }
 
+    public interface Callbacks {
+        void goToOverview();
+    }
+
     private final boolean SHOW = true;
     private final boolean HIDE = false;
 
@@ -45,6 +48,7 @@ public class SetupFragment extends Fragment {
         void buttonClicked();
     }
 
+    private Callbacks mCallbacks;
     private ButtonCommand mButtonCommand;
 
     private int mMaxNumberOfPlayers;
@@ -94,12 +98,23 @@ public class SetupFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.btnStart:
-                // TODO RKL: Go to game activity.
-                Toast.makeText(getActivity(), "Game coming soon...", Toast.LENGTH_LONG).show();
+                mCallbacks.goToOverview();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        mCallbacks = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
     }
 
     private void initializeWidgets(View view){
@@ -236,7 +251,7 @@ public class SetupFragment extends Fragment {
     private class PlayerViewHolder extends RecyclerView.ViewHolder {
 
         public PlayerViewHolder(LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.player_list_item, parent, false));
+            super(inflater.inflate(R.layout.setup_player_list_item, parent, false));
         }
     }
 

@@ -44,4 +44,8 @@ public class PlayerModel {
     public void updatePlayerName(int index, String name) {
         mPlayers.get(index).setName(name);
     }
+
+    public void clearModel() {
+        mPlayers = new ArrayList<>();
+    }
 }
