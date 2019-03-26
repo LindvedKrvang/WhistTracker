@@ -7,9 +7,13 @@ import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.krvang.lindved.whisttracker.R;
 import com.krvang.lindved.whisttracker.be.Player;
@@ -33,14 +37,16 @@ public class OverviewFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private PlayerAdapter mPlayerAdapter;
 
-
     private PlayerModel mPlayerModel;
+
+    private MenuItem btnCalculate;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPlayerModel = PlayerModel.getInstance();
 
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -53,6 +59,26 @@ public class OverviewFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_overview, menu);
+
+        btnCalculate = menu.findItem(R.id.btnCalculate);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.btnCalculate:
+                // TODO RKL: Go to CalculateFragment
+                Toast.makeText(getActivity(), "Hello World", Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+
+        }
+    }
 
     private void initializeRecyclerView(View view) {
         mRecyclerView = view.findViewById(R.id.playerRecyclerView);

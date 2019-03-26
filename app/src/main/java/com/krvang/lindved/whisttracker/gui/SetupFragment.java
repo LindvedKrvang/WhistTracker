@@ -16,7 +16,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.krvang.lindved.whisttracker.R;
 import com.krvang.lindved.whisttracker.be.Player;
@@ -98,6 +97,7 @@ public class SetupFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.btnStart:
+                setHasOptionsMenu(false);
                 mCallbacks.goToOverview();
                 return true;
             default:
@@ -199,7 +199,7 @@ public class SetupFragment extends Fragment {
 
         private List<Player> players;
 
-        public PlayerAdapter(List<Player> players) {
+        PlayerAdapter(List<Player> players) {
             this.players = players;
         }
 
@@ -250,7 +250,7 @@ public class SetupFragment extends Fragment {
 
     private class PlayerViewHolder extends RecyclerView.ViewHolder {
 
-        public PlayerViewHolder(LayoutInflater inflater, ViewGroup parent) {
+        PlayerViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.setup_player_list_item, parent, false));
         }
     }
@@ -267,7 +267,7 @@ public class SetupFragment extends Fragment {
 
         private int playerIndex;
 
-        public EditPlayerCommand(int playerIndex){
+        EditPlayerCommand(int playerIndex){
             this.playerIndex = playerIndex;
         }
 
